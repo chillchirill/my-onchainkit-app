@@ -18,6 +18,8 @@ interface Web3ContextType {
     createGame: (hours: number, minutes: number, seconds: number, percent: number, money: number, currency: string) => Promise<void>;
     getGames: () => Promise<any[]>;
     switchNetwork: (networkName: 'base-sepolia' | 'eth-sepolia' | 'base-mainnet') => Promise<void>;
+    getMoney2: (id: number, to: string) => Promise<void>;
+    getMoney3: (id: number, to: string) => Promise<void>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -60,7 +62,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
 
                 // Detect Coinbase Wallet specifically
                 let coinbaseProvider = null;
-                
+
                 if (window.ethereum?.providers) {
                     // Multiple wallets installed
                     console.log("Multiple wallets detected:", window.ethereum.providers.map((p: any) => ({
@@ -68,7 +70,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
                         isCoinbaseWallet: p.isCoinbaseWallet,
                         name: p.isMetaMask ? 'MetaMask' : p.isCoinbaseWallet ? 'Coinbase' : 'Unknown'
                     })));
-                    
+
                     coinbaseProvider = window.ethereum.providers.find((p: any) => p.isCoinbaseWallet === true);
                 } else if (window.ethereum?.isCoinbaseWallet) {
                     // Only Coinbase Wallet is installed
@@ -131,6 +133,44 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         try {
             const res = await contract.getMoney(id);
             alert(`Successfully withdrawn funds from game ${id}`);
+        } catch (error: any) {
+            if (error.reason) {
+                alert(error.reason);
+            } else {
+                console.error("Cannot get money:", error);
+                alert("Failed to withdraw funds");
+            }
+        }
+    };
+
+    const getMoney2 = async (id: number, to: string) => {
+        if (!contract) {
+            alert("Contract not initialized");
+            return;
+        }
+
+        try {
+            const res = await contract.getMoney2(id, to);
+            alert(`Successfully withdrawn funds from game ${id}, and donated 10% to ${to}`);
+        } catch (error: any) {
+            if (error.reason) {
+                alert(error.reason);
+            } else {
+                console.error("Cannot get money:", error);
+                alert("Failed to withdraw funds");
+            }
+        }
+    };
+
+    const getMoney3 = async (id: number, to: string) => {
+        if (!contract) {
+            alert("Contract not initialized");
+            return;
+        }
+
+        try {
+            const res = await contract.getMoney3(id, to);
+            alert(`Successfully donated everything to ${to}`);
         } catch (error: any) {
             if (error.reason) {
                 alert(error.reason);
@@ -207,13 +247,13 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
                 case "$":
                     if (ethPrice > 0) {
                         const ethAmount = money / ethPrice;
-                        
+
                         // Check if the ETH amount is too small
                         if (ethAmount < 0.000001) {
                             alert(`Minimum amount is $${(0.000001 * ethPrice).toFixed(6)} (0.000001 ETH)`);
                             return;
                         }
-                        
+
                         // Round to 18 decimal places to avoid precision issues
                         const ethAmountRounded = Math.round(ethAmount * 1e18) / 1e18;
                         valueInWei = ethers.parseEther(ethAmountRounded.toString());
@@ -284,7 +324,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: targetNetwork.chainId }],
             });
-            
+
             console.log(`Successfully switched to ${targetNetwork.chainName}`);
         } catch (switchError: any) {
             // If network doesn't exist, add it
@@ -353,6 +393,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         createGame,
         getGames,
         switchNetwork,
+        getMoney2,
+        getMoney3,
     };
 
     return (

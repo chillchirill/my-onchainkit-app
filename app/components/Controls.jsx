@@ -1,4 +1,4 @@
-import SimpleNetworkSwitcher from "./SimpleNetworkSwitcher";
+// import SimpleNetworkSwitcher from "./SimpleNetworkSwitcher";
 import { useCurrency } from "../contexts/CurrencyContext";
 
 const Controls = () => {
@@ -92,7 +92,7 @@ const Controls = () => {
                 </div>
             </div> */}
 
-            <SimpleNetworkSwitcher />
+            {/* <SimpleNetworkSwitcher /> */}
         </div>
     );
 };

@@ -5,9 +5,10 @@ import { useCurrency, convertCurrency } from "@/app/contexts/CurrencyContext";
 import { bigIntToFormat } from "@/app/helpers/bigIntToString";
 import Link from "next/dist/client/link";
 import { useWeb3 } from "@/app/contexts/Web3Context";
+import DonationModal from "./DonationModal";
 
 const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInfoButton: boolean }): React.JSX.Element => {
-    const { ethPrice, getMoney, betAmount } = useWeb3();
+    const { ethPrice, getMoney2, getMoney3, betAmount } = useWeb3();
 
     // State to track if component has mounted (hydration complete)
     const [isMounted, setIsMounted] = useState(false);
@@ -15,7 +16,23 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
     // State for countdown timer - initialize with a safe default
     const [timeLeft, setTimeLeft] = useState<number>(0);
 
+    // State for donation modal
+    const [showDonationModal, setShowDonationModal] = useState(false);
+
     const { currency } = useCurrency();
+
+    // Handle donation modal confirmation
+    const handleDonationConfirm = async (donationOption: 'partial' | 'full', charityAddress: string) => {
+        try {
+            if (donationOption === 'partial') {
+                await getMoney2(game.gameNumber, charityAddress);
+            } else {
+                await getMoney3(game.gameNumber, charityAddress);
+            }
+        } catch (error) {
+            console.error("Error processing donation:", error);
+        }
+    };
 
     // Helper function to format seconds to HH:MM:SS
     const secondsToClock = (seconds: number): string => {
@@ -117,11 +134,7 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
                 {
                     timeLeft <= 0 ?
                         (<button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
-                            onClick={() => {
-                                getMoney(game.gameNumber).catch((reason) => {
-                                    alert(reason);
-                                });
-                            }}>
+                            onClick={() => setShowDonationModal(true)}>
                             Get money...
                         </button>) :
                         (<button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg"
@@ -135,6 +148,14 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
                 }
 
             </div>
+
+            {/* Donation Modal */}
+            <DonationModal
+                isOpen={showDonationModal}
+                onClose={() => setShowDonationModal(false)}
+                onConfirm={handleDonationConfirm}
+                gameNumber={game?.gameNumber || 0}
+            />
         </div>
     );
 };
