@@ -1,6 +1,6 @@
-// import '@coinbase/onchainkit/styles.css';
+import '@coinbase/onchainkit/styles.css';
 // import type { Metadata } from 'next';
-// import './globals.css';
+import './globals.css';
 // import { Providers } from './providers';
 
 // export const metadata: Metadata = {
