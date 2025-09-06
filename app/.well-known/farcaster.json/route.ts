@@ -32,6 +32,12 @@ export async function GET() {
       ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
       // use only while testing
     //   noindex: true,
+    
     }),
+    
+  "baseBuilder": {
+    "allowedAddresses": ["0xac6f17D2c4BAeD0773804475BFB72297CFE00CeD"]
+  }
+
   });
 }
