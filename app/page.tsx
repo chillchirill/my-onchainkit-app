@@ -191,6 +191,6 @@ export default function HomePage() {
           </div>
         </div>
       </header>
-    Здеся моя програма
+    Здеся моя програма 2
   </div>;
 }
