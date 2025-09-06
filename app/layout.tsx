@@ -48,14 +48,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 
 import { MiniKitContextProvider } from '@/providers/MiniKitProvider';
+import { CurrencyProvider } from './contexts/CurrencyContext';
+import { Web3Provider } from './contexts/Web3Context';
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='en'>
-      <head>
-        
-      </head>
+      {/* <head>
+
+      </head> */}
       <body>
-        <MiniKitContextProvider>{children}</MiniKitContextProvider>
+        <MiniKitContextProvider>
+          <Web3Provider>
+            <CurrencyProvider>
+              {children}
+            </CurrencyProvider>
+          </Web3Provider>
+        </MiniKitContextProvider>
       </body>
     </html>
   );

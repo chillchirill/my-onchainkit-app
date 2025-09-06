@@ -132,28 +132,78 @@
 
 
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
-import {
-  ConnectWallet,
-  Wallet,
-  WalletDropdown,
-  WalletDropdownLink,
-  WalletDropdownDisconnect,
-} from '@coinbase/onchainkit/wallet';
-import {
-  Address,
-  Avatar,
-  Name,
-  Identity,
-  EthBalance,
-} from '@coinbase/onchainkit/identity';
-// import './globals.css'
-// import ArrowSvg from './svg/ArrowSvg';
-// import ImageSvg from './svg/Image';
-// import OnchainkitSvg from './svg/OnchainKit';
-// import { useWalletClient } from 'wagmi';
-import './main.css'
+// import {
+//   ConnectWallet,
+//   Wallet,
+//   WalletDropdown,
+//   WalletDropdownLink,
+//   WalletDropdownDisconnect,
+// } from '@coinbase/onchainkit/wallet';
+// import {
+//   Address,
+//   Avatar,
+//   Name,
+//   Identity,
+//   EthBalance,
+// } from '@coinbase/onchainkit/identity';
+import './main.css';
+
+import Game from "@/app/components/Game";
+import "./globals.css";
+import Header from "@/app/components/Header";
+import NewGame from "@/app/components/NewGame";
+import Controls from "@/app/components/Controls";
+import { useWeb3 } from './contexts/Web3Context';
+import GameInfo from './types/GameInfo';
+
+function Home() {
+  const { getGames, isConnected, contract, switchNetwork } = useWeb3();
+
+  const [games, setGames] = useState<GameInfo[]>([]);
+
+  useEffect(() => {
+    if (!isConnected) return;
+    switchNetwork('eth-sepolia');
+  }, [isConnected]);
+
+  useEffect(() => {
+		if (!contract) return;
+
+		const fetchGames = async () => {
+			const gamesList = await getGames();
+			setGames(gamesList);
+		};
+
+		fetchGames();
+	}, [getGames, contract]);
+
+  if (!isConnected) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-500 text-lg">Loading... (If you are using PC, please connect your wallet)</div>
+      </div>
+    );
+  }
+
+  contract.on("GameStep", async () => {
+    const gamesList = await getGames();
+    setGames(gamesList);
+  });
+
+  return (
+    <>
+      <Header />
+      <Controls />
+      <NewGame />
+      {games.map((game, index) => (
+        <Game key={index} game={game} showMoreInfoButton={true} />
+      ))}
+    </>
+  );
+}
+
 export default function HomePage() {
   const { setFrameReady, isFrameReady } = useMiniKit();
 
@@ -161,36 +211,39 @@ export default function HomePage() {
     if (!isFrameReady) setFrameReady();
   }, [isFrameReady, setFrameReady]);
 
-  return <div>
-    <header className="pt-4 pr-4">
-        <div className="flex justify-end">
-          <div className="wallet-container">
-            <Wallet>
-              <ConnectWallet>
-                <Avatar className="h-6 w-6" />
+  return (<div>
+    {/* <header className="pt-4 pr-4"> */}
+    {/* <header className="">
+      <div className="flex justify-end pr-4">
+        <div className="wallet-container pt-2">
+          <Wallet>
+            <ConnectWallet>
+              <Avatar className="h-6 w-6" />
+              <Name />
+            </ConnectWallet>
+            <WalletDropdown>
+              <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                <Avatar />
                 <Name />
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar />
-                  <Name />
-                  <Address />
-                  <EthBalance />
-                </Identity>
-                <WalletDropdownLink
-                  icon="wallet"
-                  href="https://keys.coinbase.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wallet
-                </WalletDropdownLink>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
-          </div>
+                <Address />
+                <EthBalance />
+              </Identity>
+              <WalletDropdownLink
+                icon="wallet"
+                href="https://keys.coinbase.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Wallet
+              </WalletDropdownLink>
+              <WalletDropdownDisconnect />
+            </WalletDropdown>
+          </Wallet>
         </div>
-      </header>
-    Здеся моя програма 2
-  </div>;
+      </div>
+    </header> */}
+    <>
+      <Home />
+    </>
+  </div>);
 }
