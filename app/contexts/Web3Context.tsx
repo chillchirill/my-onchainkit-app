@@ -16,6 +16,8 @@ interface Web3ContextType {
     error: string | null;
     availableWallets: WalletInfo[];
     connectWallet: (walletType?: string) => Promise<void>;
+    checkBalance: () => Promise<string>;
+    estimateGas: (txData: any) => Promise<bigint>;
     getMoney: (id: number) => Promise<void>;
     betAmount: (id: number, amount: number) => Promise<void>;
     createGame: (hours: number, minutes: number, seconds: number, percent: number, money: number, currency: string) => Promise<void>;
@@ -190,6 +192,39 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         initializeApp();
     }, [ABI, contractAddress]);
 
+    // Check user's ETH balance
+    const checkBalance = async (): Promise<string> => {
+        if (!signer) {
+            throw new Error("Signer not available");
+        }
+        
+        try {
+            const balance = await signer.provider.getBalance(signer.address);
+            const balanceInEth = ethers.formatEther(balance);
+            console.log(`Current balance: ${balanceInEth} ETH`);
+            return balanceInEth;
+        } catch (error) {
+            console.error("Error checking balance:", error);
+            throw error;
+        }
+    };
+
+    // Estimate gas for a transaction
+    const estimateGas = async (txData: { to?: string; value?: bigint; data?: string }): Promise<bigint> => {
+        if (!signer) {
+            throw new Error("Signer not available");
+        }
+
+        try {
+            const gasEstimate = await signer.estimateGas(txData);
+            console.log(`Estimated gas: ${gasEstimate.toString()}`);
+            return gasEstimate;
+        } catch (error) {
+            console.error("Error estimating gas:", error);
+            throw error;
+        }
+    };
+
     const getMoney = async (id: number) => {
         if (!contract) {
             alert("Contract not initialized");
@@ -248,14 +283,43 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     };
 
     const betAmount = async (id: number, amount: number) => {
-        if (!contract) {
-            alert("Contract not initialized");
+        if (!contract || !signer) {
+            alert("Contract or signer not initialized");
             return;
         }
 
         try {
             // Convert currency to wei
             const valueInWei = ethers.parseEther(amount.toString());
+            
+            // Check balance before transaction
+            const balance = await signer.provider.getBalance(signer.address);
+            console.log(`Current balance: ${ethers.formatEther(balance)} ETH`);
+            console.log(`Transaction value: ${ethers.formatEther(valueInWei)} ETH`);
+            
+            // Estimate gas first
+            try {
+                const gasEstimate = await contract.step.estimateGas(id, { value: valueInWei });
+                const gasPrice = await signer.provider.getFeeData();
+                const totalGasCost = gasEstimate * (gasPrice.gasPrice || BigInt(0));
+                const totalRequired = valueInWei + totalGasCost;
+                
+                console.log(`Estimated gas: ${gasEstimate.toString()}`);
+                console.log(`Gas price: ${gasPrice.gasPrice?.toString()} wei`);
+                console.log(`Total gas cost: ${ethers.formatEther(totalGasCost)} ETH`);
+                console.log(`Total required: ${ethers.formatEther(totalRequired)} ETH`);
+                
+                if (balance < totalRequired) {
+                    const shortfall = totalRequired - balance;
+                    alert(`Insufficient funds. You need ${ethers.formatEther(shortfall)} more ETH for this transaction.\n` +
+                          `Balance: ${ethers.formatEther(balance)} ETH\n` +
+                          `Required: ${ethers.formatEther(totalRequired)} ETH`);
+                    return;
+                }
+            } catch (gasError) {
+                console.error("Gas estimation failed:", gasError);
+                alert("Failed to estimate gas. The transaction might fail.");
+            }
 
             const tx = await contract.step(
                 id,
@@ -271,7 +335,17 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             alert("Betted successfully!");
         } catch (error: unknown) {
             console.error("Error betting:", error);
-            alert("Failed to bet: " + ((error as { reason?: string }).reason || (error as Error).message));
+            const errorMessage = (error as { reason?: string }).reason || (error as Error).message;
+            
+            // Provide more specific error messages
+            if (errorMessage.includes("insufficient funds")) {
+                const balance = await checkBalance();
+                alert(`Transaction failed: Insufficient funds\nYour balance: ${balance} ETH\nTry reducing the bet amount or add more ETH to your wallet.`);
+            } else if (errorMessage.includes("gas")) {
+                alert(`Transaction failed: Gas related error\n${errorMessage}\nTry increasing gas limit or wait for network congestion to reduce.`);
+            } else {
+                alert("Failed to bet: " + errorMessage);
+            }
         }
     };
 
@@ -456,6 +530,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         error,
         availableWallets,
         connectWallet,
+        checkBalance,
+        estimateGas,
         getMoney,
         betAmount,
         createGame,

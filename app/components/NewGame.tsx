@@ -73,47 +73,56 @@ const NewGame = () => {
             </div>
 
             {/* Period section */}
-            <div className="bg-purple-100 rounded-lg p-4 mb-6 flex items-center gap-3">
-                <label className="text-gray-700 font-semibold text-lg">
+            <div className="bg-purple-100 rounded-lg p-4 mb-6">
+                <label className="text-gray-700 font-semibold text-lg mb-3 block">
                     Period (TTL):
                 </label>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="number"
-                        placeholder="HH"
-                        min="0"
-                        max={maxHours}
-                        className="w-16 px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        value={hours}
-                        onChange={(e) => setHours(e.target.value === "" ? 0 : Number(e.target.value))}
-                    />
-                    <span className="text-xl font-mono">:HH</span>
-                    <input
-                        type="number"
-                        placeholder="MM"
-                        min="0"
-                        max="59"
-                        className="w-16 px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        value={minutes}
-                        onChange={(e) => setMinutes(e.target.value === "" ? 0 : Number(e.target.value))}
-                    />
-                    <span className="text-xl font-mono">:MM</span>
-                    <input
-                        type="number"
-                        placeholder="SS"
-                        min="0"
-                        max="59"
-                        className="w-16 px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        value={seconds}
-                        onChange={(e) => setSeconds(e.target.value === "" ? 0 : Number(e.target.value))}
-                    />
-                    <span className="text-xl font-mono">:SS</span>
-                </div>
-                <div className="ml-2">
-                    <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12,6 12,12 16,14"></polyline>
-                    </svg>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <div className="flex items-center gap-1">
+                        <input
+                            type="number"
+                            placeholder="HH"
+                            min="0"
+                            max={maxHours}
+                            className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            value={hours}
+                            onChange={(e) => setHours(e.target.value === "" ? 0 : Number(e.target.value))}
+                        />
+                        <span className="text-sm sm:text-lg font-mono text-gray-600">h</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                        <input
+                            type="number"
+                            placeholder="MM"
+                            min="0"
+                            max="59"
+                            className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            value={minutes}
+                            onChange={(e) => setMinutes(e.target.value === "" ? 0 : Number(e.target.value))}
+                        />
+                        <span className="text-sm sm:text-lg font-mono text-gray-600">m</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                        <input
+                            type="number"
+                            placeholder="SS"
+                            min="0"
+                            max="59"
+                            className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            value={seconds}
+                            onChange={(e) => setSeconds(e.target.value === "" ? 0 : Number(e.target.value))}
+                        />
+                        <span className="text-sm sm:text-lg font-mono text-gray-600">s</span>
+                    </div>
+                    
+                    <div className="ml-2">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
