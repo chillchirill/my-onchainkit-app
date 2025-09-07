@@ -17,7 +17,7 @@ interface Web3ContextType {
     availableWallets: WalletInfo[];
     connectWallet: (walletType?: string) => Promise<void>;
     checkBalance: () => Promise<string>;
-    estimateGas: (txData: any) => Promise<bigint>;
+    estimateGas: (txData: object) => Promise<bigint>;
     getMoney: (id: number) => Promise<void>;
     betAmount: (id: number, amount: number) => Promise<void>;
     createGame: (hours: number, minutes: number, seconds: number, percent: number, money: number, currency: string) => Promise<void>;
