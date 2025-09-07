@@ -8,14 +8,36 @@ const NewGame = () => {
     const { createGame } = useWeb3();
     const [currency, setCurrency] = useState<string>("ETH");
     const { currencyOptions } = useCurrency();
-    const [newGame, setNewGame] = useState({
-        minIncrease: 5,
-        period: 0,
-        minimalBetETH: 0,
-    });
-    const [hours, setHours] = useState(0);
-    const [minutes, setMinutes] = useState(0);
-    const [seconds, setSeconds] = useState(0);
+    const [minIncrease, setMinIncrease] = useState("");
+    const [hours, setHours] = useState("");
+    const [minutes, setMinutes] = useState("");
+    const [seconds, setSeconds] = useState("");
+    const [minimalBetETH, setMinimalBetETH] = useState("");
+
+    const checkInputForGameCreation = () => {
+        const _hours = parseInt(hours);
+        const _minutes = parseInt(minutes);
+        const _seconds = parseInt(seconds);
+        const _minimalBetETH = parseFloat(minimalBetETH);
+        const _minIncrease = parseFloat(minIncrease);
+
+        if (isNaN(_hours) || isNaN(_minutes) || isNaN(_seconds) || isNaN(_minimalBetETH) || isNaN(_minIncrease)) {
+            alert("Please enter valid numeric values for hours, minutes, seconds, minimal bet, and min increase.");
+            return false;
+        }
+
+        if (_hours < 0 || _hours > maxHours || _minutes < 0 || _minutes > 59 || _seconds < 0 || _seconds > 59) {
+            alert(`Invalid time input. Please ensure hours (0-${maxHours}), minutes (0-59), and seconds (0-59) are within valid ranges.`);
+            return false;
+        }
+
+        if (_minimalBetETH <= 0) {
+            alert("Please enter a valid minimal bet greater than 0.");
+            return false;
+        }
+
+        return true;
+    };
 
     const maxHours = 120;
 
@@ -24,32 +46,24 @@ const NewGame = () => {
     };
 
     const handleCreateGame = () => {
-        if (hours < 0 || hours > maxHours || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
-            alert(`Invalid time input. Please ensure hours (0-${maxHours}), minutes (0-59), and seconds (0-59) are within valid ranges.`);
+        if (!checkInputForGameCreation()) {
+            alert("Invalid input. Please correct the errors and try again.");
             return;
         }
 
-        if (newGame.minimalBetETH <= 0) {
-            alert("Please enter a valid minimal bet greater than 0.");
-            return;
-        }
-
-        if (hours * 3600 + minutes * 60 + seconds <= 0) {
-            alert("Please set a valid period greater than 0 seconds.");
-            return;
-        }
+        const _hours = parseInt(hours);
+        const _minutes = parseInt(minutes);
+        const _seconds = parseInt(seconds);
+        const _minimalBetETH = parseFloat(minimalBetETH);
+        const _minIncrease = parseFloat(minIncrease);
 
         // setGames((prevGames) => [newGameData, ...prevGames]);
-        createGame(hours, minutes, seconds, newGame.minIncrease, newGame.minimalBetETH, currency);
+        createGame(_hours, _minutes, _seconds, _minIncrease, _minimalBetETH, currency);
 
-        setNewGame({
-            minIncrease: 5,
-            period: 0,
-            minimalBetETH: 0,
-        });
-        setHours(0);
-        setMinutes(0);
-        setSeconds(0);
+        setMinIncrease("");
+        setHours("");
+        setMinutes("");
+        setSeconds("");
     };
 
     return (
@@ -66,8 +80,8 @@ const NewGame = () => {
                     step="0.1"
                     lang="en-US"
                     className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    value={newGame.minIncrease}
-                    onChange={(e) => setNewGame({ ...newGame, minIncrease: Number(e.target.value) })}
+                    value={minIncrease}
+                    onChange={(e) => setMinIncrease(e.target.value)}
                 />
                 <span className="text-gray-700 font-semibold text-lg">%</span>
             </div>
@@ -86,11 +100,11 @@ const NewGame = () => {
                             max={maxHours}
                             className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value={hours}
-                            onChange={(e) => setHours(e.target.value === "" ? 0 : Number(e.target.value))}
+                            onChange={(e) => setHours(e.target.value)}
                         />
                         <span className="text-sm sm:text-lg font-mono text-gray-600">h</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                         <input
                             type="number"
@@ -99,11 +113,11 @@ const NewGame = () => {
                             max="59"
                             className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value={minutes}
-                            onChange={(e) => setMinutes(e.target.value === "" ? 0 : Number(e.target.value))}
+                            onChange={(e) => setMinutes(e.target.value)}
                         />
                         <span className="text-sm sm:text-lg font-mono text-gray-600">m</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                         <input
                             type="number"
@@ -112,11 +126,11 @@ const NewGame = () => {
                             max="59"
                             className="w-12 sm:w-16 px-1 sm:px-2 py-2 border border-gray-300 rounded-lg text-gray-700 text-center font-mono text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             value={seconds}
-                            onChange={(e) => setSeconds(e.target.value === "" ? 0 : Number(e.target.value))}
+                            onChange={(e) => setSeconds(e.target.value)}
                         />
                         <span className="text-sm sm:text-lg font-mono text-gray-600">s</span>
                     </div>
-                    
+
                     <div className="ml-2">
                         <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -147,8 +161,8 @@ const NewGame = () => {
                     lang="en-US"
                     placeholder="Enter amount..."
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={newGame.minimalBetETH}
-                    onChange={(e) => setNewGame({ ...newGame, minimalBetETH: e.target.value === "" ? 0 : parseFloat(e.target.value) || 0 })}
+                    value={minimalBetETH}
+                    onChange={(e) => setMinimalBetETH(e.target.value)}
                 />
             </div>
 
