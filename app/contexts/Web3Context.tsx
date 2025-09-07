@@ -138,8 +138,11 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             console.log("Using wallet provider:", selectedProvider);
             const ethereumProvider = new ethers.BrowserProvider(selectedProvider);
             
+            switchNetwork('eth-sepolia');
+            
             // Request account access
             await ethereumProvider.send('eth_requestAccounts', []);
+
 
             const web3Signer = await ethereumProvider.getSigner();
 
