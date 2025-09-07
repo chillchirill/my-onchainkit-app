@@ -54,8 +54,8 @@ const NewGame = () => {
         const _hours = parseInt(hours);
         const _minutes = parseInt(minutes);
         const _seconds = parseInt(seconds);
+        const _minIncrease = parseInt(minIncrease);
         const _minimalBetETH = parseFloat(minimalBetETH);
-        const _minIncrease = parseFloat(minIncrease);
 
         // setGames((prevGames) => [newGameData, ...prevGames]);
         createGame(_hours, _minutes, _seconds, _minIncrease, _minimalBetETH, currency);
