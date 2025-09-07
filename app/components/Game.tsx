@@ -86,8 +86,6 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
             <div className="grid grid-cols-3 gap-4 mb-4">
                 <div className="bg-green-100 rounded-lg p-4">
                     <span className="text-gray-700 font-semibold">Bank: </span>
-                    {/* <span className="text-gray-800 font-mono">{formatCurrency(convertCurrency(game.bankAmountETH, "ETH", currency), currency)}</span> */}
-                    {/* <span className="text-gray-800 font-mono">{bigIntToFormat(convertCurrency(game.bankAmountETH, "ETH", currency), currency)}</span> */}
                     <span className="text-gray-800 font-mono">{bigIntToFormat(convertCurrency(game?.bankAmountETH, "ETH", currency, ethPrice), currency)}</span>
                 </div>
                 <div className={`rounded-lg p-4 text-center ${getTimeColor()}`}>
@@ -105,7 +103,6 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-purple-100 rounded-lg p-4">
                     <span className="text-gray-700 font-semibold">Last Amount: </span>
-                    {/* <span className="text-gray-800 font-mono">{formatCurrency(convertCurrency(game.lastAmountETH, "ETH", currency), currency)}</span> */}
                     <span className="text-gray-800 font-mono">{bigIntToFormat(convertCurrency(game.lastAmountETH, "ETH", currency, ethPrice), currency)}</span>
                 </div>
                 <div className="bg-pink-100 rounded-lg p-4">
@@ -118,7 +115,6 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
             <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-cyan-100 rounded-lg p-4">
                     <span className="text-gray-700 font-semibold">Minimal bet: </span>
-                    {/* <span className="text-gray-800 font-mono">{formatCurrency(convertCurrency(game.minimalBetETH, "ETH", currency), currency)}</span> */}
                     <span className="text-gray-800 font-mono">{bigIntToFormat(convertCurrency(game?.lastAmountETH * (1 + game?.minIncrease / 100), "ETH", currency, ethPrice), currency)}</span>
                 </div>
                 <div className="bg-gray-100 rounded-lg p-4">
@@ -130,7 +126,7 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
             {/* Action buttons */}
             <div className={showMoreInfoButton ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-4"}>
                 {showMoreInfoButton && (
-                    <button 
+                    <button
                         onClick={() => setShowGameInfoModal(true)}
                         className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg text-center"
                     >

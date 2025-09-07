@@ -31,13 +31,13 @@ export async function GET() {
       ogDescription: process.env.NEXT_PUBLIC_APP_OG_DESCRIPTION,
       ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
       // use only while testing
-    //   noindex: true,
-    
+      //   noindex: true,
+
     }),
-    
-  "baseBuilder": {
-    "allowedAddresses": ["0xac6f17D2c4BAeD0773804475BFB72297CFE00CeD"]
-  }
+
+    "baseBuilder": {
+      "allowedAddresses": ["0xac6f17D2c4BAeD0773804475BFB72297CFE00CeD"]
+    }
 
   });
 }

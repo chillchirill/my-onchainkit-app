@@ -22,8 +22,8 @@ export default function NetworkSwitcher() {
   ];
 
   const getNetworkByChainId = (chainId: number) => {
-    return allNetworks.find(network => network.id === chainId) || 
-           { id: chainId, name: `Unknown Network (${chainId})`, color: 'bg-gray-500' };
+    return allNetworks.find(network => network.id === chainId) ||
+      { id: chainId, name: `Unknown Network (${chainId})`, color: 'bg-gray-500' };
   };
 
   const currentNetwork = getNetworkByChainId(chainId);
@@ -45,25 +45,24 @@ export default function NetworkSwitcher() {
           Current: {currentNetwork.name}
         </span>
       </div>
-      
+
       {/* Show all networks, not just configured ones */}
       <div className="flex flex-wrap gap-2">
         {allNetworks.map((network) => {
           const isConfigured = chains.some(c => c.id === network.id);
           const isCurrent = network.id === chainId;
-          
+
           return (
             <button
               key={network.id}
               onClick={() => handleSwitchChain(network.id)}
               disabled={isPending || isCurrent}
-              className={`px-3 py-1 text-xs rounded-md border transition-colors ${
-                isCurrent
+              className={`px-3 py-1 text-xs rounded-md border transition-colors ${isCurrent
                   ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
                   : isConfigured
-                  ? 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400'
-                  : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-300'
-              }`}
+                    ? 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300 hover:border-gray-400'
+                    : 'bg-red-50 hover:bg-red-100 text-red-700 border-red-300'
+                }`}
               title={isConfigured ? 'Click to switch' : 'Not configured - will attempt to add'}
             >
               {isPending ? 'Switching...' : network.name}

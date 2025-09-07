@@ -1,6 +1,6 @@
 # Fund Ur Charity (FundUC)
 
-**FundUC** is a new blockchain game that combines competition with real social impact. Players place strategic bids, each one increasing the shared pool. The last player to hold their bid before the timer runs out wins the game — not for themselves alone, but for a cause they care about. You can check out our Demo here: [link]()
+**FundUC** is a new blockchain game that combines competition with real social impact. Players place strategic bids, each one increasing the shared pool. The last player to hold their bid before the timer runs out wins the game — not for themselves alone, but for a cause they care about. You can check out our Demo here: [link](), and the app here: [link](https://my-onchainkit-app-flax.vercel.app/)
 
 The winner chooses how the funds are distributed: either donating a small share while keeping the rest, or sending 100% directly to a verified charitable organization of their choice. This way, every game session turns excitement and strategy into real-world support for meaningful causes.
 # Rules

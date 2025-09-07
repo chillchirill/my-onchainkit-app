@@ -21,7 +21,7 @@ const GameInfoModal: React.FC<GameInfoModalProps> = ({ isOpen, onClose, gameId }
 
     useEffect(() => {
         if (!isOpen || !contract) return;
-        
+
         const fetchGameData = async () => {
             setIsLoading(true);
             try {

@@ -24,7 +24,7 @@ const WalletSelector = () => {
     return (
         <div className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg">
             <h2 className="text-2xl font-bold text-center mb-6">Connect Your Wallet</h2>
-            
+
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     {error}

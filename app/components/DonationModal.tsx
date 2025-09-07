@@ -22,7 +22,7 @@ const charities: Charity[] = [
     },
     {
         name: "Example Charity 2",
-        address: "0x3B70D7D293baA136942b3b63d504eAd613FAb220", 
+        address: "0x3B70D7D293baA136942b3b63d504eAd613FAb220",
         description: "Children's emergency relief"
     },
     {
@@ -59,7 +59,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, onConfir
                     <h3 className="text-lg font-semibold text-gray-700">
                         Would you like to make a donation?
                     </h3>
-                    
+
                     {/* Donation type selection */}
                     <div className="space-y-3">
                         <label className="flex items-center space-x-3 cursor-pointer">
@@ -73,7 +73,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, onConfir
                             />
                             <span className="text-gray-700">Donate 10% to charity</span>
                         </label>
-                        
+
                         <label className="flex items-center space-x-3 cursor-pointer">
                             <input
                                 type="radio"
@@ -114,7 +114,7 @@ const DonationModal: React.FC<DonationModalProps> = ({ isOpen, onClose, onConfir
                     >
                         {donationType === 'partial' ? 'Donate 10% & Keep 90%' : 'Donate Everything'}
                     </button>
-                    
+
                     <button
                         onClick={onClose}
                         className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
