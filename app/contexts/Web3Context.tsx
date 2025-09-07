@@ -3,12 +3,13 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { ethers } from 'ethers';
 import AuctionAddress from '@/app/artifacts/Auction-address.json';
 import AuctionArtifact from '@/app/artifacts/Auction.json';
+import GameInfo from '../types/GameInfo';
 
 interface Web3ContextType {
     contract: ethers.Contract;
-    provider: ethers.BrowserProvider | null;
-    signer: ethers.JsonRpcSigner | null;
-    ethereum: any;
+    provider: ethers.BrowserProvider;
+    signer: ethers.JsonRpcSigner;
+    ethereum: ethers.Eip1193Provider;
     ethPrice: number;
     isConnected: boolean;
     isLoading: boolean;
@@ -16,7 +17,7 @@ interface Web3ContextType {
     getMoney: (id: number) => Promise<void>;
     betAmount: (id: number, amount: number) => Promise<void>;
     createGame: (hours: number, minutes: number, seconds: number, percent: number, money: number, currency: string) => Promise<void>;
-    getGames: () => Promise<any[]>;
+    getGames: () => Promise<GameInfo[]>;
     switchNetwork: (networkName: 'base-sepolia' | 'eth-sepolia' | 'base-mainnet') => Promise<void>;
     getMoney2: (id: number, to: string) => Promise<void>;
     getMoney3: (id: number, to: string) => Promise<void>;
@@ -40,7 +41,7 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     const [contract, setContract] = useState<ethers.Contract | null>(null);
     const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
     const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
-    const [ethereum, setEthereum] = useState<any>(null);
+    const [ethereum, setEthereum] = useState<null | ethers.Eip1193Provider>(null);
     const [ethPrice, setEthPrice] = useState<number>(0);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -65,13 +66,13 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
 
                 if (window.ethereum?.providers) {
                     // Multiple wallets installed
-                    console.log("Multiple wallets detected:", window.ethereum.providers.map((p: any) => ({
-                        isMetaMask: p.isMetaMask,
-                        isCoinbaseWallet: p.isCoinbaseWallet,
-                        name: p.isMetaMask ? 'MetaMask' : p.isCoinbaseWallet ? 'Coinbase' : 'Unknown'
+                    console.log("Multiple wallets detected:", window.ethereum.providers.map((p: object) => ({
+                        isMetaMask: (p as { isMetaMask: boolean }).isMetaMask,
+                        isCoinbaseWallet: (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet,
+                        name: (p as { isMetaMask: boolean, isCoinbaseWallet: boolean }).isMetaMask ? 'MetaMask' : (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet ? 'Coinbase' : 'Unknown'
                     })));
 
-                    coinbaseProvider = window.ethereum.providers.find((p: any) => p.isCoinbaseWallet === true);
+                    coinbaseProvider = window.ethereum.providers.find((p: object) => (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet === true);
                 } else if (window.ethereum?.isCoinbaseWallet) {
                     // Only Coinbase Wallet is installed
                     console.log("Single Coinbase Wallet detected");
@@ -113,9 +114,9 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
 
                 setIsConnected(true);
                 console.log("Web3 initialized successfully!");
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Web3 initialization error:", err);
-                setError(err.message || "Failed to initialize Web3");
+                setError((err as Error).message || "Failed to initialize Web3");
             } finally {
                 setIsLoading(false);
             }
@@ -131,11 +132,11 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         }
 
         try {
-            const res = await contract.getMoney(id);
+            await contract.getMoney(id);
             alert(`Successfully withdrawn funds from game ${id}`);
-        } catch (error: any) {
-            if (error.reason) {
-                alert(error.reason);
+        } catch (error: unknown) {
+            if ((error as { reason?: string }).reason) {
+                alert((error as { reason: string }).reason);
             } else {
                 console.error("Cannot get money:", error);
                 alert("Failed to withdraw funds");
@@ -150,11 +151,11 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         }
 
         try {
-            const res = await contract.getMoney2(id, to);
+            await contract.getMoney2(id, to);
             alert(`Successfully withdrawn funds from game ${id}, and donated 10% to ${to}`);
-        } catch (error: any) {
-            if (error.reason) {
-                alert(error.reason);
+        } catch (error: unknown) {
+            if ((error as { reason?: string }).reason) {
+                alert((error as { reason: string }).reason);
             } else {
                 console.error("Cannot get money:", error);
                 alert("Failed to withdraw funds");
@@ -169,11 +170,11 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         }
 
         try {
-            const res = await contract.getMoney3(id, to);
+            await contract.getMoney3(id, to);
             alert(`Successfully donated everything to ${to}`);
-        } catch (error: any) {
-            if (error.reason) {
-                alert(error.reason);
+        } catch (error: unknown) {
+            if ((error as { reason?: string }).reason) {
+                alert((error as { reason: string }).reason);
             } else {
                 console.error("Cannot get money:", error);
                 alert("Failed to withdraw funds");
@@ -203,9 +204,9 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             const receipt = await tx.wait();
             console.log("Transaction confirmed:", receipt);
             alert("Betted successfully!");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error betting:", error);
-            alert("Failed to bet: " + (error.reason || error.message));
+            alert("Failed to bet: " + ((error as { reason?: string }).reason || (error as Error).message));
         }
     };
 
@@ -280,9 +281,9 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             const receipt = await tx.wait();
             console.log("Transaction confirmed:", receipt);
             alert("Game created successfully!");
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error creating game:", error);
-            alert("Failed to create game: " + (error.reason || error.message));
+            alert("Failed to create game: " + ((error as { reason?: string }).reason || (error as Error).message));
         }
     };
 
@@ -326,27 +327,27 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             });
 
             console.log(`Successfully switched to ${targetNetwork.chainName}`);
-        } catch (switchError: any) {
+        } catch (switchError: unknown) {
             // If network doesn't exist, add it
-            if (switchError.code === 4902) {
+            if ((switchError as { code?: number }).code === 4902) {
                 try {
                     await ethereum.request({
                         method: 'wallet_addEthereumChain',
                         params: [targetNetwork],
                     });
                     console.log(`Successfully added and switched to ${targetNetwork.chainName}`);
-                } catch (addError: any) {
+                } catch (addError: unknown) {
                     console.error(`Failed to add ${targetNetwork.chainName}:`, addError);
-                    alert(`Failed to add ${targetNetwork.chainName}: ${addError.message}`);
+                    alert(`Failed to add ${targetNetwork.chainName}: ${(addError as { message: string }).message}`);
                 }
             } else {
                 console.error(`Failed to switch to ${targetNetwork.chainName}:`, switchError);
-                alert(`Failed to switch to ${targetNetwork.chainName}: ${switchError.message}`);
+                alert(`Failed to switch to ${targetNetwork.chainName}: ${(switchError as { message: string }).message}`);
             }
         }
     };
 
-    const getGames = async (start: number = 0, end: number = 15000) => {
+    const getGames = async (start: number = 0, end: number = 15000): Promise<GameInfo[]> => {
         if (!contract) {
             console.error("Contract not initialized");
             return [];
@@ -362,9 +363,9 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
 
                 const gameInfo = {
                     lastBetter: last,
-                    lastAmountETH: ethers.formatEther(lastAmount),
+                    lastAmountETH: parseFloat(ethers.formatEther(lastAmount)),
                     lastBetTime: Number(lastTime),
-                    bankAmountETH: ethers.formatEther(bank),
+                    bankAmountETH: parseFloat(ethers.formatEther(bank)),
                     period: Number(period),
                     minIncrease: Number(minimalIncrease),
                     gameNumber: Number(id),
@@ -373,17 +374,17 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
             }
 
             return gamesArray;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching games:", error);
             return [];
         }
     };
 
     const contextValue: Web3ContextType = {
-        contract,
-        provider,
-        signer,
-        ethereum,
+        contract: contract as ethers.Contract,
+        provider: provider as ethers.BrowserProvider,
+        signer: signer as ethers.JsonRpcSigner,
+        ethereum: ethereum as ethers.Eip1193Provider,
         ethPrice,
         isConnected,
         isLoading,
