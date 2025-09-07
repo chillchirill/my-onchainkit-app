@@ -3,9 +3,9 @@ import React, { useState, useEffect } from "react";
 import GameInfo from "@/app/types/GameInfo";
 import { useCurrency, convertCurrency } from "@/app/contexts/CurrencyContext";
 import { bigIntToFormat } from "@/app/helpers/bigIntToString";
-import Link from "next/dist/client/link";
 import { useWeb3 } from "@/app/contexts/Web3Context";
 import DonationModal from "./DonationModal";
+import GameInfoModal from "./GameInfoModal";
 
 const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInfoButton: boolean }): React.JSX.Element => {
     const { ethPrice, getMoney2, getMoney3, betAmount } = useWeb3();
@@ -18,6 +18,9 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
 
     // State for donation modal
     const [showDonationModal, setShowDonationModal] = useState(false);
+
+    // State for game info modal
+    const [showGameInfoModal, setShowGameInfoModal] = useState(false);
 
     const { currency } = useCurrency();
 
@@ -127,9 +130,12 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
             {/* Action buttons */}
             <div className={showMoreInfoButton ? "grid grid-cols-2 gap-4" : "grid grid-cols-1 gap-4"}>
                 {showMoreInfoButton && (
-                    <Link href={`/game/${game?.gameNumber}`} className="">
-                        <p className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg text-center">More Info...</p>
-                    </Link>
+                    <button 
+                        onClick={() => setShowGameInfoModal(true)}
+                        className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 text-lg text-center"
+                    >
+                        More Info...
+                    </button>
                 )}
                 {
                     timeLeft <= 0 ?
@@ -155,6 +161,13 @@ const Game = ({ game, showMoreInfoButton = true }: { game: GameInfo, showMoreInf
                 onClose={() => setShowDonationModal(false)}
                 onConfirm={handleDonationConfirm}
                 gameNumber={game?.gameNumber || 0}
+            />
+
+            {/* Game Info Modal */}
+            <GameInfoModal
+                isOpen={showGameInfoModal}
+                onClose={() => setShowGameInfoModal(false)}
+                gameId={game?.gameNumber || 0}
             />
         </div>
     );

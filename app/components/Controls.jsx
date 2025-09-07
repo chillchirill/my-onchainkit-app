@@ -21,11 +21,11 @@ const Controls = () => {
 
             {/* Game Controls */}
             {/* <div className="bg-gray-100 p-3 sm:p-4 rounded-lg"> */}
-                {/* Mobile: Stack vertically, Desktop: Single row */}
-                {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"> */}
+            {/* Mobile: Stack vertically, Desktop: Single row */}
+            {/* <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"> */}
 
-                    {/* Navigation and Range Inputs Row */}
-                    {/* <div className="flex items-center justify-center gap-2 sm:gap-4 flex-shrink-0">
+            {/* Navigation and Range Inputs Row */}
+            {/* <div className="flex items-center justify-center gap-2 sm:gap-4 flex-shrink-0">
                         <button className="text-gray-600 hover:text-gray-800 text-xl sm:text-2xl font-bold px-2 py-1 touch-manipulation"
                             onClick={() => {
                                 const rangeSize = rightRange - leftRange;
@@ -61,26 +61,33 @@ const Controls = () => {
                         </button>
                     </div> */}
 
-                    {/* Currency Selector - Full width on mobile */}
-                    <div className="flex justify-center sm:justify-start">
-                        <select
-                            className="w-full sm:w-auto p-2 text-sm sm:text-base border border-gray-300 rounded bg-white min-w-[100px]"
-                            value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
+            {/* Currency Selector and Refresh Button - Same row */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center sm:justify-start">
+                <select
+                    className="w-full sm:w-auto p-2 text-sm sm:text-base border border-gray-300 rounded bg-white min-w-[100px]"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                >
+                    {currencyOptions.map((option) => (
+                        <option
+                            key={option}
+                            value={option}
                         >
-                            {currencyOptions.map((option) => (
-                                <option
-                                    key={option}
-                                    value={option}
-                                >
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            {option}
+                        </option>
+                    ))}
+                </select>
 
-                    {/* Finished Games Checkbox - Center on mobile */}
-                    {/* <div className="flex items-center justify-center sm:justify-start gap-2 sm:ml-auto">
+                <button
+                    className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm sm:text-base transition-colors duration-200"
+                    onClick={() => window.location.reload()}
+                >
+                    Refresh Games
+                </button>
+            </div>
+
+            {/* Finished Games Checkbox - Center on mobile */}
+            {/* <div className="flex items-center justify-center sm:justify-start gap-2 sm:ml-auto">
                         <span className="text-gray-700 text-sm sm:text-base">Show finished games?</span>
                         <input
                             type="checkbox"

@@ -157,6 +157,7 @@ import NewGame from "@/app/components/NewGame";
 import Controls from "@/app/components/Controls";
 import { useWeb3 } from './contexts/Web3Context';
 import GameInfo from './types/GameInfo';
+import WalletSelector from './components/WalletSelector';
 
 function Home() {
   const { getGames, isConnected, contract, switchNetwork } = useWeb3();
@@ -181,8 +182,11 @@ function Home() {
 
   if (!isConnected) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-500 text-lg">Loading... (If you are using PC, please connect your wallet)</div>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6 p-4">
+        <WalletSelector />
+        <div className="text-gray-500 text-center text-lg max-w-md">
+          Loading... (If you are using PC, please connect your wallet)
+        </div>
       </div>
     );
   }

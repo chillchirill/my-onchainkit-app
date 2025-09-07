@@ -14,6 +14,8 @@ interface Web3ContextType {
     isConnected: boolean;
     isLoading: boolean;
     error: string | null;
+    availableWallets: WalletInfo[];
+    connectWallet: (walletType?: string) => Promise<void>;
     getMoney: (id: number) => Promise<void>;
     betAmount: (id: number, amount: number) => Promise<void>;
     createGame: (hours: number, minutes: number, seconds: number, percent: number, money: number, currency: string) => Promise<void>;
@@ -21,6 +23,13 @@ interface Web3ContextType {
     switchNetwork: (networkName: 'base-sepolia' | 'eth-sepolia' | 'base-mainnet') => Promise<void>;
     getMoney2: (id: number, to: string) => Promise<void>;
     getMoney3: (id: number, to: string) => Promise<void>;
+}
+
+interface WalletInfo {
+    name: string;
+    type: string;
+    provider: ethers.Eip1193Provider;
+    installed: boolean;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -46,83 +55,136 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [availableWallets, setAvailableWallets] = useState<WalletInfo[]>([]);
 
     const ABI = AuctionArtifact.abi;
     const contractAddress = AuctionAddress.address;
+
+    // Detect available wallets
+    const detectWallets = (): WalletInfo[] => {
+        const wallets: WalletInfo[] = [];
+        
+        if (typeof window !== 'undefined' && window.ethereum) {
+            if (window.ethereum.providers) {
+                // Multiple wallets installed
+                window.ethereum.providers.forEach((provider: object) => {
+                    if ((provider as { isMetaMask: boolean }).isMetaMask) {
+                        wallets.push({
+                            name: 'MetaMask',
+                            type: 'metamask',
+                            provider: provider as ethers.Eip1193Provider,
+                            installed: true
+                        });
+                    }
+                    if ((provider as { isCoinbaseWallet: boolean }).isCoinbaseWallet) {
+                        wallets.push({
+                            name: 'Coinbase Wallet',
+                            type: 'coinbase',
+                            provider: provider as ethers.Eip1193Provider,
+                            installed: true
+                        });
+                    }
+                });
+            } else {
+                // Single wallet installed
+                if (window.ethereum.isMetaMask) {
+                    wallets.push({
+                        name: 'MetaMask',
+                        type: 'metamask',
+                        provider: window.ethereum,
+                        installed: true
+                    });
+                } else if (window.ethereum.isCoinbaseWallet) {
+                    wallets.push({
+                        name: 'Coinbase Wallet',
+                        type: 'coinbase',
+                        provider: window.ethereum,
+                        installed: true
+                    });
+                }
+            }
+        }
+
+        return wallets;
+    };
+
+    // Connect to a specific wallet
+    const connectWallet = async (walletType?: string) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const wallets = detectWallets();
+            setAvailableWallets(wallets);
+
+            if (wallets.length === 0) {
+                throw new Error("No compatible wallets found. Please install MetaMask or Coinbase Wallet.");
+            }
+
+            let selectedProvider = null;
+
+            if (walletType) {
+                // Connect to specific wallet type
+                const wallet = wallets.find(w => w.type === walletType);
+                if (!wallet) {
+                    throw new Error(`${walletType} wallet not found`);
+                }
+                selectedProvider = wallet.provider;
+            } else {
+                // Use first available wallet or let user choose
+                selectedProvider = wallets[0].provider;
+            }
+
+            console.log("Using wallet provider:", selectedProvider);
+            const ethereumProvider = new ethers.BrowserProvider(selectedProvider);
+            
+            // Request account access
+            await ethereumProvider.send('eth_requestAccounts', []);
+
+            const web3Signer = await ethereumProvider.getSigner();
+
+            setProvider(ethereumProvider);
+            setSigner(web3Signer);
+            setEthereum(selectedProvider);
+
+            // Create contract instance
+            const contractInstance = new ethers.Contract(contractAddress, ABI, web3Signer);
+            setContract(contractInstance);
+
+            setIsConnected(true);
+            console.log("Wallet connected successfully!");
+        } catch (err: unknown) {
+            console.error("Wallet connection error:", err);
+            setError((err as Error).message || "Failed to connect wallet");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!ABI || !contractAddress) {
             console.log("ABI or contract address not available yet");
             return;
-        };
+        }
 
-        const initWeb3 = async () => {
+        // Detect wallets and get ETH price on load
+        const initializeApp = async () => {
+            const wallets = detectWallets();
+            setAvailableWallets(wallets);
+
+            // Get ETH price
             try {
-                setIsLoading(true);
-                setError(null);
-
-                // Detect Coinbase Wallet specifically
-                let coinbaseProvider = null;
-
-                if (window.ethereum?.providers) {
-                    // Multiple wallets installed
-                    console.log("Multiple wallets detected:", window.ethereum.providers.map((p: object) => ({
-                        isMetaMask: (p as { isMetaMask: boolean }).isMetaMask,
-                        isCoinbaseWallet: (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet,
-                        name: (p as { isMetaMask: boolean, isCoinbaseWallet: boolean }).isMetaMask ? 'MetaMask' : (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet ? 'Coinbase' : 'Unknown'
-                    })));
-
-                    coinbaseProvider = window.ethereum.providers.find((p: object) => (p as { isCoinbaseWallet: boolean }).isCoinbaseWallet === true);
-                } else if (window.ethereum?.isCoinbaseWallet) {
-                    // Only Coinbase Wallet is installed
-                    console.log("Single Coinbase Wallet detected");
-                    coinbaseProvider = window.ethereum;
-                }
-
-                if (!coinbaseProvider) {
-                    throw new Error("Coinbase Wallet not found. Please install Coinbase Wallet extension.");
-                }
-
-                console.log("Using Coinbase Wallet provider:", coinbaseProvider);
-                const ethereumProvider = new ethers.BrowserProvider(coinbaseProvider);
-                setEthereum(coinbaseProvider); // Store the raw provider
-
-                console.log("Ethereum provider:", ethereumProvider);
-                console.log(contractAddress, ABI);
-
-                // Request account access
-                await ethereumProvider.send('eth_requestAccounts', []);
-
-                const web3Signer = await ethereumProvider.getSigner();
-
-                setProvider(ethereumProvider);
-                setSigner(web3Signer);
-                setEthereum(coinbaseProvider); // Store the raw Coinbase provider
-
-                // Create contract instance
-                const contractInstance = new ethers.Contract(contractAddress, ABI, web3Signer);
-                setContract(contractInstance);
-
-                // Get ETH price
-                try {
-                    const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT");
-                    const data = await response.json();
-                    setEthPrice(parseFloat(data.price));
-                } catch (priceError) {
-                    console.warn("Failed to fetch ETH price:", priceError);
-                }
-
-                setIsConnected(true);
-                console.log("Web3 initialized successfully!");
-            } catch (err: unknown) {
-                console.error("Web3 initialization error:", err);
-                setError((err as Error).message || "Failed to initialize Web3");
-            } finally {
-                setIsLoading(false);
+                const response = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT");
+                const data = await response.json();
+                setEthPrice(parseFloat(data.price));
+            } catch (priceError) {
+                console.warn("Failed to fetch ETH price:", priceError);
             }
+
+            setIsLoading(false);
         };
 
-        initWeb3();
+        initializeApp();
     }, [ABI, contractAddress]);
 
     const getMoney = async (id: number) => {
@@ -305,8 +367,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
                 chainId: '0xAA36A7', // 11155111 in hex
                 chainName: 'Ethereum Sepolia',
                 nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://rpc.sepolia.org'],
-                blockExplorerUrls: ['https://sepolia.etherscan.io/']
+                rpcUrls: ['https://chain-proxy.wallet.coinbase.com?targetName=ethereum-sepolia'],
+                //blockExplorerUrls: ['https://sepolia.etherscan.io/']
             },
             'base-mainnet': {
                 chainId: '0x2105', // 8453 in hex
@@ -389,6 +451,8 @@ export const Web3Provider = ({ children }: Web3ProviderProps) => {
         isConnected,
         isLoading,
         error,
+        availableWallets,
+        connectWallet,
         getMoney,
         betAmount,
         createGame,
