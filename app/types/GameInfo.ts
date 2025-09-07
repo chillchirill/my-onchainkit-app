@@ -1,5 +1,3 @@
-import { AddressLike } from "ethers";
-
 interface GameInfo {
     lastBetter: string;
     lastAmountETH: number;
